@@ -1,7 +1,9 @@
 [package]
 name = "pretty_env_logger"
 version = "0.1.0"
+description = "a visually pretty env_logger"
 authors = ["Sean McArthur <sean.monstar@gmail.com>"]
+license = "MIT/Apache-2.0"
 
 [dependencies]
 ansi_term = "0.9"
