@@ -1,0 +1,9 @@
+[package]
+name = "pretty_env_logger"
+version = "0.1.0"
+authors = ["Sean McArthur <sean.monstar@gmail.com>"]
+
+[dependencies]
+ansi_term = "0.9"
+env_logger = "0.3"
+log = "0.3"
