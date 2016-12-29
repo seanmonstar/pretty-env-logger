@@ -25,7 +25,7 @@ impl fmt::Display for Level {
 
 static MAX_MODULE_WIDTH: AtomicUsize = ATOMIC_USIZE_INIT;
 
-pub fn init() {
+pub fn init() -> Result<(), log::SetLoggerError> {
     let mut builder = LogBuilder::new();
 
     builder.format(|record| {
@@ -47,5 +47,5 @@ pub fn init() {
         builder.parse(&s);
     }
 
-    builder.init().unwrap();
+    builder.init()
 }
