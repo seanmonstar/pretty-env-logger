@@ -7,5 +7,5 @@ license = "MIT/Apache-2.0"
 
 [dependencies]
 ansi_term = "0.9"
-env_logger = "0.3"
+env_logger = "0.4"
 log = "0.3"
