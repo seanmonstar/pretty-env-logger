@@ -1,3 +1,26 @@
+#![deny(warnings)]
+#![deny(missing_docs)]
+
+//! A logger configured via an environment variable which writes to standard
+//! error with nice colored output for log levels.
+//!
+//! ## Example
+//!
+//! ```
+//! extern crate pretty_env_logger;
+//! #[macro_use] extern crate log;
+//!
+//! fn main() {
+//!     pretty_env_logger::init().unwrap();
+//!
+//!     trace!("a trace example");
+//!     debug!("deboogging");
+//!     info!("such information");
+//!     warn!("o_O");
+//!     error!("boom");
+//! }
+//! ```
+
 extern crate ansi_term;
 extern crate env_logger;
 extern crate log;
@@ -24,6 +47,16 @@ impl fmt::Display for Level {
 }
 
 static MAX_MODULE_WIDTH: AtomicUsize = ATOMIC_USIZE_INIT;
+
+/// Initializes the global logger with a pretty env logger.
+///
+/// This should be called early in the execution of a Rust program, and the
+/// global logger may only be initialized once. Future initialization attempts
+/// will return an error.
+///
+/// # Errors
+///
+/// This function fails to set the global logger if one has already been set.
 
 pub fn init() -> Result<(), log::SetLoggerError> {
     let mut builder = LogBuilder::new();
