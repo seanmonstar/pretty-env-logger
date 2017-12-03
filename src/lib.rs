@@ -57,8 +57,21 @@ static MAX_MODULE_WIDTH: AtomicUsize = ATOMIC_USIZE_INIT;
 /// # Errors
 ///
 /// This function fails to set the global logger if one has already been set.
-
+#[inline]
 pub fn init() -> Result<(), log::SetLoggerError> {
+    init_custom_env("RUST_LOG")
+}
+
+/// Initialized the global logger with a pretty env logger, with a custom variable name.
+///
+/// This should be called early in the execution of a Rust program, and the
+/// global logger may only be initialized once. Future initialization attempts
+/// will return an error.
+///
+/// # Errors
+///
+/// This function fails to set the global logger if one has already been set.
+pub fn init_custom_env(environment_variable_name: &str) -> Result<(), log::SetLoggerError> {
     let mut builder = LogBuilder::new();
 
     builder.format(|record| {
@@ -76,7 +89,7 @@ pub fn init() -> Result<(), log::SetLoggerError> {
                 record.args())
     });
 
-    if let Ok(s) = ::std::env::var("RUST_LOG") {
+    if let Ok(s) = ::std::env::var(environment_variable_name) {
         builder.parse(&s);
     }
 
