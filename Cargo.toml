@@ -2,6 +2,7 @@
 name = "pretty_env_logger"
 version = "0.1.1"
 description = "a visually pretty env_logger"
+repository = "https://github.com/seanmonstar/pretty-env-logger"
 authors = ["Sean McArthur <sean.monstar@gmail.com>"]
 license = "MIT/Apache-2.0"
 
