@@ -1,10 +1,16 @@
 extern crate pretty_env_logger;
 #[macro_use] extern crate log;
 
-fn main() {
-    pretty_env_logger::init().unwrap();
+mod one {
+    pub fn deep() {
+        trace!("one level deep!");
+    }
+}
 
-    trace!("a trace example");
+fn main() {
+    pretty_env_logger::init();
+
+    self::one::deep();
     debug!("deboogging");
     info!("such information");
     warn!("o_O");

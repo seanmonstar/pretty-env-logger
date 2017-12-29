@@ -1,4 +1,4 @@
-#![deny(warnings)]
+//#![deny(warnings)]
 #![deny(missing_docs)]
 
 //! A logger configured via an environment variable which writes to standard
@@ -11,7 +11,7 @@
 //! #[macro_use] extern crate log;
 //!
 //! fn main() {
-//!     pretty_env_logger::init().unwrap();
+//!     pretty_env_logger::init();
 //!
 //!     trace!("a trace example");
 //!     debug!("deboogging");
@@ -29,19 +29,19 @@ use std::fmt;
 use std::sync::atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT};
 
 use ansi_term::{Color, Style};
-use env_logger::LogBuilder;
-use log::LogLevel;
+use env_logger::Builder;
+use log::Level;
 
-struct Level(LogLevel);
+struct ColorLevel(Level);
 
-impl fmt::Display for Level {
+impl fmt::Display for ColorLevel {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.0 {
-            LogLevel::Trace => Color::Purple.paint("TRACE"),
-            LogLevel::Debug => Color::Blue.paint("DEBUG"),
-            LogLevel::Info => Color::Green.paint("INFO "),
-            LogLevel::Warn => Color::Yellow.paint("WARN "),
-            LogLevel::Error => Color::Red.paint("ERROR")
+            Level::Trace => Color::Purple.paint("TRACE"),
+            Level::Debug => Color::Blue.paint("DEBUG"),
+            Level::Info => Color::Green.paint("INFO "),
+            Level::Warn => Color::Yellow.paint("WARN "),
+            Level::Error => Color::Red.paint("ERROR")
         }.fmt(f)
     }
 }
@@ -54,12 +54,38 @@ static MAX_MODULE_WIDTH: AtomicUsize = ATOMIC_USIZE_INIT;
 /// global logger may only be initialized once. Future initialization attempts
 /// will return an error.
 ///
-/// # Errors
+/// # Panics
 ///
 /// This function fails to set the global logger if one has already been set.
 #[inline]
-pub fn init() -> Result<(), log::SetLoggerError> {
-    init_custom_env("RUST_LOG")
+pub fn init() {
+    try_init().unwrap();
+}
+
+/// Initializes the global logger with a pretty env logger.
+///
+/// This should be called early in the execution of a Rust program, and the
+/// global logger may only be initialized once. Future initialization attempts
+/// will return an error.
+///
+/// # Errors
+///
+/// This function fails to set the global logger if one has already been set.
+pub fn try_init() -> Result<(), log::SetLoggerError> {
+    try_init_custom_env("RUST_LOG")
+}
+
+/// Initialized the global logger with a pretty env logger, with a custom variable name.
+///
+/// This should be called early in the execution of a Rust program, and the
+/// global logger may only be initialized once. Future initialization attempts
+/// will return an error.
+///
+/// # Panics
+///
+/// This function fails to set the global logger if one has already been set.
+pub fn init_custom_env(environment_variable_name: &str) {
+    try_init_custom_env(environment_variable_name).unwrap();
 }
 
 /// Initialized the global logger with a pretty env logger, with a custom variable name.
@@ -71,27 +97,33 @@ pub fn init() -> Result<(), log::SetLoggerError> {
 /// # Errors
 ///
 /// This function fails to set the global logger if one has already been set.
-pub fn init_custom_env(environment_variable_name: &str) -> Result<(), log::SetLoggerError> {
-    let mut builder = LogBuilder::new();
+pub fn try_init_custom_env(environment_variable_name: &str) -> Result<(), log::SetLoggerError> {
+    let mut builder = Builder::new();
 
-    builder.format(|record| {
-        let mut module_path = record.location().module_path().to_string();
-        let max_width = MAX_MODULE_WIDTH.load(Ordering::Relaxed);
-        if max_width > module_path.len() {
-            let diff = max_width - module_path.len();
-            module_path.extend(::std::iter::repeat(' ').take(diff));
+    builder.format(|f, record| {
+        use std::io::Write;
+        if let Some(module_path) = record.module_path() {
+            let mut max_width = MAX_MODULE_WIDTH.load(Ordering::Relaxed);
+            if max_width < module_path.len() {
+                MAX_MODULE_WIDTH.store(module_path.len(), Ordering::Relaxed);
+                max_width = module_path.len();
+            }
+            writeln!(f, " {} {} > {}; {width}",
+                ColorLevel(record.level()),
+                Style::new().bold().paint(format!("{: <width$}", module_path, width=max_width)),
+                record.args(),
+                width=max_width)
         } else {
-            MAX_MODULE_WIDTH.store(module_path.len(), Ordering::Relaxed);
-        }
-        format!("{}:{}: {}",
-                Level(record.level()),
-                Style::new().bold().paint(module_path),
+            writeln!(f, " {} > {}",
+                ColorLevel(record.level()),
                 record.args())
+
+        }
     });
 
     if let Ok(s) = ::std::env::var(environment_variable_name) {
         builder.parse(&s);
     }
 
-    builder.init()
+    builder.try_init()
 }
