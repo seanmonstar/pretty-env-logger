@@ -98,6 +98,29 @@ pub fn init_custom_env(environment_variable_name: &str) {
 ///
 /// This function fails to set the global logger if one has already been set.
 pub fn try_init_custom_env(environment_variable_name: &str) -> Result<(), log::SetLoggerError> {
+    let mut builder = formatted_builder()?;
+
+    if let Ok(s) = ::std::env::var(environment_variable_name) {
+        builder.parse(&s);
+    }
+
+    builder.try_init()
+}
+
+/// Returns a `env_logger::Builder` for further customization.
+///
+/// This method will return a colored and formatted) `env_logger::Builder`
+/// for further customization. Tefer to env_logger::Build crate documentation
+/// for further details and usage.
+///
+/// This should be called early in the execution of a Rust program, and the
+/// global logger may only be initialized once. Future initialization attempts
+/// will return an error.
+///
+/// # Errors
+///
+/// This function fails to set the global logger if one has already been set.
+pub fn formatted_builder() -> Result<Builder, log::SetLoggerError> {
     let mut builder = Builder::new();
 
     builder.format(|f, record| {
@@ -109,21 +132,17 @@ pub fn try_init_custom_env(environment_variable_name: &str) -> Result<(), log::S
                 max_width = module_path.len();
             }
             writeln!(f, " {} {} > {}; {width}",
-                ColorLevel(record.level()),
-                Style::new().bold().paint(format!("{: <width$}", module_path, width=max_width)),
-                record.args(),
-                width=max_width)
+                     ColorLevel(record.level()),
+                     Style::new().bold().paint(format!("{: <width$}", module_path, width=max_width)),
+                     record.args(),
+                     width=max_width)
         } else {
             writeln!(f, " {} > {}",
-                ColorLevel(record.level()),
-                record.args())
+                     ColorLevel(record.level()),
+                     record.args())
 
         }
     });
 
-    if let Ok(s) = ::std::env::var(environment_variable_name) {
-        builder.parse(&s);
-    }
-
-    builder.try_init()
+    Ok(builder)
 }
