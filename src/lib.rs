@@ -1,4 +1,4 @@
-//#![deny(warnings)]
+#![deny(warnings)]
 #![deny(missing_docs)]
 
 //! A logger configured via an environment variable which writes to standard
@@ -131,11 +131,10 @@ pub fn formatted_builder() -> Result<Builder, log::SetLoggerError> {
                 MAX_MODULE_WIDTH.store(module_path.len(), Ordering::Relaxed);
                 max_width = module_path.len();
             }
-            writeln!(f, " {} {} > {}; {width}",
+            writeln!(f, " {} {} > {}",
                      ColorLevel(record.level()),
                      Style::new().bold().paint(format!("{: <width$}", module_path, width=max_width)),
-                     record.args(),
-                     width=max_width)
+                     record.args())
         } else {
             writeln!(f, " {} > {}",
                      ColorLevel(record.level()),
