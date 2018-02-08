@@ -11,6 +11,7 @@ readme = "README.md"
 
 include = [
   "Cargo.toml",
+  "README.md",
   "LICENSE-APACHE",
   "LICENSE-MIT",
   "src/**/*"
