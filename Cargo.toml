@@ -5,6 +5,9 @@ description = "a visually pretty env_logger"
 repository = "https://github.com/seanmonstar/pretty-env-logger"
 authors = ["Sean McArthur <sean@seanmonstar>"]
 license = "MIT/Apache-2.0"
+categories = ["development-tools::debugging"]
+keywords = ["log", "logger", "logging"]
+
 
 [dependencies]
 env_logger = "0.5"
