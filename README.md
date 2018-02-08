@@ -10,6 +10,8 @@ A simple logger built on top off [env_logger](https://docs.rs/env_logger).
 It is configured via an environment variable and writes to standard
 error with nice colored output for log levels.
 
+![example output](readme-example.png)
+
 ## Usage
 
 Add the dependency to your `Cargo.toml`:
