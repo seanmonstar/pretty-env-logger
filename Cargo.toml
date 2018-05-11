@@ -1,6 +1,6 @@
 [package]
 name = "pretty_env_logger"
-version = "0.2.2"
+version = "0.2.3"
 description = "a visually pretty env_logger"
 repository = "https://github.com/seanmonstar/pretty-env-logger"
 authors = ["Sean McArthur <sean@seanmonstar>"]
@@ -19,9 +19,5 @@ include = [
 [dependencies]
 env_logger = "0.5"
 log = "0.4"
+ansi_term = "0.11"
 
-[target.'cfg(all(windows, target_arch = "x86"))'.dependencies]
-ansi_term = "0.9" # 0.10 fails to compile on windows x86
-
-[target.'cfg(not(all(windows, target_arch = "x86")))'.dependencies]
-ansi_term = "0.10"
