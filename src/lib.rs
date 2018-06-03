@@ -125,22 +125,16 @@ pub fn formatted_builder() -> Result<Builder, log::SetLoggerError> {
 
     builder.format(|f, record| {
         use std::io::Write;
-        if let Some(module_path) = record.module_path() {
-            let mut max_width = MAX_MODULE_WIDTH.load(Ordering::Relaxed);
-            if max_width < module_path.len() {
-                MAX_MODULE_WIDTH.store(module_path.len(), Ordering::Relaxed);
-                max_width = module_path.len();
-            }
-            writeln!(f, " {} {} > {}",
-                     ColorLevel(record.level()),
-                     Style::new().bold().paint(format!("{: <width$}", module_path, width=max_width)),
-                     record.args())
-        } else {
-            writeln!(f, " {} > {}",
-                     ColorLevel(record.level()),
-                     record.args())
-
+        let target = record.target();
+        let mut max_width = MAX_MODULE_WIDTH.load(Ordering::Relaxed);
+        if max_width < target.len() {
+            MAX_MODULE_WIDTH.store(target.len(), Ordering::Relaxed);
+            max_width = target.len();
         }
+        writeln!(f, " {} {} > {}",
+                 ColorLevel(record.level()),
+                 Style::new().bold().paint(format!("{: <width$}", target, width=max_width)),
+                 record.args())
     });
 
     Ok(builder)
