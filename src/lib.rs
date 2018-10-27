@@ -110,7 +110,7 @@ pub fn try_init_custom_env(environment_variable_name: &str) -> Result<(), log::S
 /// Returns a `env_logger::Builder` for further customization.
 ///
 /// This method will return a colored and formatted) `env_logger::Builder`
-/// for further customization. Tefer to env_logger::Build crate documentation
+/// for further customization. Refer to env_logger::Build crate documentation
 /// for further details and usage.
 ///
 /// This should be called early in the execution of a Rust program, and the
