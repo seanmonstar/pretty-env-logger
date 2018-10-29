@@ -146,7 +146,7 @@ pub fn try_init_custom_env(environment_variable_name: &str) -> Result<(), log::S
 ///
 /// This function fails to set the global logger if one has already been set.
 pub fn try_init_timed_custom_env(environment_variable_name: &str) -> Result<(), log::SetLoggerError> {
-    let mut builder = formatted_timed_builder()?;
+    let mut builder = formatted_timed_builder();
 
     if let Ok(s) = ::std::env::var(environment_variable_name) {
         builder.parse(&s);
@@ -160,14 +160,6 @@ pub fn try_init_timed_custom_env(environment_variable_name: &str) -> Result<(), 
 /// This method will return a colored and formatted) `env_logger::Builder`
 /// for further customization. Refer to env_logger::Build crate documentation
 /// for further details and usage.
-///
-/// This should be called early in the execution of a Rust program, and the
-/// global logger may only be initialized once. Future initialization attempts
-/// will return an error.
-///
-/// # Errors
-///
-/// This function fails to set the global logger if one has already been set.
 pub fn formatted_builder() -> Result<Builder, log::SetLoggerError> {
     let mut builder = Builder::new();
 
@@ -191,17 +183,9 @@ pub fn formatted_builder() -> Result<Builder, log::SetLoggerError> {
 /// Returns a `env_logger::Builder` for further customization.
 ///
 /// This method will return a colored and time formatted) `env_logger::Builder`
-/// for further customization. Tefer to env_logger::Build crate documentation
+/// for further customization. Refer to env_logger::Build crate documentation
 /// for further details and usage.
-///
-/// This should be called early in the execution of a Rust program, and the
-/// global logger may only be initialized once. Future initialization attempts
-/// will return an error.
-///
-/// # Errors
-///
-/// This function fails to set the global logger if one has already been set.
-pub fn formatted_timed_builder() -> Result<Builder, log::SetLoggerError> {
+pub fn formatted_timed_builder() -> Builder {
     let mut builder = Builder::new();
 
     builder.format(|f, record| {
@@ -212,12 +196,12 @@ pub fn formatted_timed_builder() -> Result<Builder, log::SetLoggerError> {
             MAX_MODULE_WIDTH.store(target.len(), Ordering::Relaxed);
             max_width = target.len();
         }
-        writeln!(f, " {}:[{}] {} > {}",
+        writeln!(f, " {} {} {} > {}",
+                 Local::now().format("%Y-%m-%d %H:%M:%S"),
                  ColorLevel(record.level()),
-                 Local::now().format("%Y-%m-%dT%H:%M:%S"),
                  Style::new().bold().paint(format!("{: <width$}", target, width=max_width)),
                  record.args())
     });
 
-    Ok(builder)
+    builder
 }
