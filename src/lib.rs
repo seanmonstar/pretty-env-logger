@@ -120,7 +120,7 @@ pub fn init_custom_env(environment_variable_name: &str) {
 ///
 /// This function fails to set the global logger if one has already been set.
 pub fn try_init_custom_env(environment_variable_name: &str) -> Result<(), log::SetLoggerError> {
-    let mut builder = formatted_builder()?;
+    let mut builder = formatted_builder();
 
     if let Ok(s) = ::std::env::var(environment_variable_name) {
         builder.parse(&s);
@@ -150,10 +150,10 @@ pub fn try_init_timed_custom_env(environment_variable_name: &str) -> Result<(), 
 
 /// Returns a `env_logger::Builder` for further customization.
 ///
-/// This method will return a colored and formatted) `env_logger::Builder`
+/// This method will return a colored and formatted `env_logger::Builder`
 /// for further customization. Refer to env_logger::Build crate documentation
 /// for further details and usage.
-pub fn formatted_builder() -> Result<Builder, log::SetLoggerError> {
+pub fn formatted_builder() -> Builder {
     let mut builder = Builder::new();
 
     builder.format(|f, record| {
@@ -179,12 +179,12 @@ pub fn formatted_builder() -> Result<Builder, log::SetLoggerError> {
         )
     });
 
-    Ok(builder)
+    builder
 }
 
 /// Returns a `env_logger::Builder` for further customization.
 ///
-/// This method will return a colored and time formatted) `env_logger::Builder`
+/// This method will return a colored and time formatted `env_logger::Builder`
 /// for further customization. Refer to env_logger::Build crate documentation
 /// for further details and usage.
 pub fn formatted_timed_builder() -> Builder {
