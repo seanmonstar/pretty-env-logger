@@ -4,7 +4,6 @@
 [![Docs](https://docs.rs/pretty_env_logger/badge.svg)](https://docs.rs/pretty_env_logger)
 [![MIT/APACHE-2.0](https://img.shields.io/crates/l/pretty_env_logger.svg)](https://crates.io/crates/pretty_env_logger)
 [![Travis CI](https://travis-ci.org/seanmonstar/pretty-env-logger.svg?branch=master)](https://travis-ci.org/seanmonstar/pretty-env-logger)
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/dv21dcfjkd2fskxh?svg=true)](https://ci.appveyor.com/project/seanmonstar/pretty-env-logger)
 
 A simple logger built on top off [env_logger](https://docs.rs/env_logger).
 It is configured via an environment variable and writes to standard
@@ -19,7 +18,7 @@ Add the dependency to your `Cargo.toml`:
 ```toml
 [dependencies]
 log = "0.4"
-pretty_env_logger = "0.2"
+pretty_env_logger = "0.3"
 ```
 
 Add some usage to your application:

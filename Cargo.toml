@@ -1,6 +1,6 @@
 [package]
 name = "pretty_env_logger"
-version = "0.2.5"
+version = "0.3.0"
 description = "a visually pretty env_logger"
 repository = "https://github.com/seanmonstar/pretty-env-logger"
 authors = ["Sean McArthur <sean@seanmonstar>"]
