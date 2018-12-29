@@ -206,7 +206,7 @@ pub fn formatted_timed_builder() -> Builder {
         writeln!(
             f,
             " {} {} {} > {}",
-            Local::now().format("%Y-%m-%d %H:%M:%S"),
+            Local::now().format("%Y-%m-%dT%H:%M:%S%.3f"),
             level,
             target,
             record.args(),
