@@ -13,7 +13,7 @@ mod one {
 
 fn main() {
 
-    pretty_env_logger::formatted_builder().unwrap()
+    pretty_env_logger::formatted_builder()
         //let's just set some random stuff.. for more see
         //https://docs.rs/env_logger/0.5.0-rc.1/env_logger/struct.Builder.html
         .target(Target::Stdout)
