@@ -25,7 +25,7 @@ extern crate env_logger;
 extern crate log;
 extern crate chrono;
 
-use std::sync::atomic::{AtomicUsize, Ordering, ATOMIC_USIZE_INIT};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use chrono::Local;
 use env_logger::{fmt::{Color, Style, StyledValue}, Builder};
@@ -41,7 +41,7 @@ fn colored_level<'a>(style: &'a mut Style, level: Level) -> StyledValue<'a, &'st
     }
 }
 
-static MAX_MODULE_WIDTH: AtomicUsize = ATOMIC_USIZE_INIT;
+static MAX_MODULE_WIDTH: AtomicUsize = AtomicUsize::new(0);
 
 /// Initializes the global logger with a pretty env logger.
 ///
@@ -123,7 +123,7 @@ pub fn try_init_custom_env(environment_variable_name: &str) -> Result<(), log::S
     let mut builder = formatted_builder();
 
     if let Ok(s) = ::std::env::var(environment_variable_name) {
-        builder.parse(&s);
+        builder.parse_filters(&s);
     }
 
     builder.try_init()
@@ -142,7 +142,7 @@ pub fn try_init_timed_custom_env(environment_variable_name: &str) -> Result<(), 
     let mut builder = formatted_timed_builder();
 
     if let Ok(s) = ::std::env::var(environment_variable_name) {
-        builder.parse(&s);
+        builder.parse_filters(&s);
     }
 
     builder.try_init()
