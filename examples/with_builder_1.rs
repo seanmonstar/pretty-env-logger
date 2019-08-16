@@ -17,7 +17,7 @@ fn main() {
         //let's just set some random stuff.. for more see
         //https://docs.rs/env_logger/0.5.0-rc.1/env_logger/struct.Builder.html
         .target(Target::Stdout)
-        .parse("with_builder_1=trace")
+        .parse_filters("with_builder_1=trace")
         .init();
 
     info!("such information");
