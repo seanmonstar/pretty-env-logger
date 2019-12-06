@@ -38,7 +38,7 @@ fn main() {
 Then run your app with the environmental variable set:
 
 ```
-RUST_LOG=myapp=trace cargo run
+RUST_LOG=trace cargo run
 ```
 
 ## License
