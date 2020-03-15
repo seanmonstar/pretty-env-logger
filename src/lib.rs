@@ -138,6 +138,19 @@ pub fn try_init_custom_env(environment_variable_name: &str) -> Result<(), log::S
 /// global logger may only be initialized once. Future initialization attempts
 /// will return an error.
 ///
+/// # Panics
+///
+/// This function fails to set the global logger if one has already been set.
+pub fn init_timed_custom_env(environment_variable_name: &str) {
+    try_init_timed_custom_env(environment_variable_name).unwrap();
+}
+
+/// Initialized the global logger with a timed pretty env logger, with a custom variable name.
+///
+/// This should be called early in the execution of a Rust program, and the
+/// global logger may only be initialized once. Future initialization attempts
+/// will return an error.
+///
 /// # Errors
 ///
 /// This function fails to set the global logger if one has already been set.
