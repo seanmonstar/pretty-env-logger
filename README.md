@@ -5,7 +5,7 @@
 [![MIT/APACHE-2.0](https://img.shields.io/crates/l/pretty_env_logger.svg)](https://crates.io/crates/pretty_env_logger)
 [![Travis CI](https://travis-ci.org/seanmonstar/pretty-env-logger.svg?branch=master)](https://travis-ci.org/seanmonstar/pretty-env-logger)
 
-A simple logger built on top off [env_logger](https://docs.rs/env_logger).
+A simple logger built on top of [env_logger](https://docs.rs/env_logger).
 It is configured via an environment variable and writes to standard
 error with nice colored output for log levels.
 
