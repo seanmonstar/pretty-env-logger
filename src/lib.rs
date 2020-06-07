@@ -223,6 +223,70 @@ pub fn formatted_timed_builder() -> Builder {
     builder
 }
 
+/// Returns a `env_logger::Builder` for further customization.
+///
+/// This method will return a colored and time formatted `env_logger::Builder`
+/// for further customization. Refer to env_logger::Build crate documentation
+/// for further details and usage.
+pub fn custom_formatter(
+    show_timestamp: bool,
+    show_line: bool,
+) -> Builder {
+
+    let mut builder = Builder::new();
+
+    builder.format(move |f, record| {
+        use std::io::Write;
+        let target = record.target();
+        let max_width = max_target_width(target);
+
+        let mut style = f.style();
+        let level = colored_level(&mut style, record.level());
+
+        let mut style = f.style();
+        let target = style.set_bold(true).value(Padded {
+            value: target,
+            width: max_width,
+        });
+
+        // Show/Hide filename.rs:lineno
+        let line = if show_line {
+            let line = format!("{}:{}",
+                record.file().unwrap().to_string().split("/").last().unwrap(),
+                record.line().unwrap());
+
+            let mut style = f.style();
+            let max_width_file = max_file_width(&line);
+
+            format!("{}", style.set_bold(true).value(Padded {
+                value: line,
+                width: max_width_file,
+            }))
+        } else {
+            "".to_string()
+        };
+
+        // Show/Hide timestamp
+        let time = if show_timestamp {
+            format!("{}", f.timestamp_millis())
+        } else {
+            "".to_string()
+        };
+
+        writeln!(
+            f,
+            "{} {} {} {} > {}",
+            time,
+            line,
+            level,
+            target,
+            record.args(),
+        )
+    });
+
+    builder
+}
+
 struct Padded<T> {
     value: T,
     width: usize,
@@ -240,6 +304,18 @@ fn max_target_width(target: &str) -> usize {
     let max_width = MAX_MODULE_WIDTH.load(Ordering::Relaxed);
     if max_width < target.len() {
         MAX_MODULE_WIDTH.store(target.len(), Ordering::Relaxed);
+        target.len()
+    } else {
+        max_width
+    }
+}
+
+static MAX_FILE_WIDTH: AtomicUsize = AtomicUsize::new(0);
+
+fn max_file_width(target: &str) -> usize {
+    let max_width = MAX_FILE_WIDTH.load(Ordering::Relaxed);
+    if max_width < target.len() {
+        MAX_FILE_WIDTH.store(target.len(), Ordering::Relaxed);
         target.len()
     } else {
         max_width
