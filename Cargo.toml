@@ -21,5 +21,5 @@ default = ["regex"]
 regex = ["env_logger/regex"]
 
 [dependencies]
-env_logger = { version = "0.7.0", default-features = false, features = ["termcolor", "humantime", "atty"] }
+env_logger = { version = "0.8", default-features = false, features = ["termcolor", "humantime", "atty"] }
 log = "0.4"
