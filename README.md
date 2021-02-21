@@ -24,14 +24,11 @@ pretty_env_logger = "0.4"
 Add some usage to your application:
 
 ```rust
-extern crate pretty_env_logger;
-#[macro_use] extern crate log;
-
 fn main() {
     pretty_env_logger::init();
-    info!("such information");
-    warn!("o_O");
-    error!("much error");
+    log::info!("such information");
+    log::warn!("o_O");
+    log::error!("much error");
 }
 ```
 
