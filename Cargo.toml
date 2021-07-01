@@ -17,5 +17,5 @@ include = [
 ]
 
 [dependencies]
-env_logger = "0.7.0"
+env_logger = "0.9"
 log = "0.4"
