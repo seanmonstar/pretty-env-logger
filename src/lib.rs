@@ -1,6 +1,6 @@
 #![cfg_attr(test, deny(warnings))]
 #![deny(missing_docs)]
-#![doc(html_root_url = "https://docs.rs/pretty_env_logger/0.4.0")]
+#![doc(html_root_url = "https://docs.rs/pretty_env_logger/0.4.1")]
 
 //! A logger configured via an environment variable which writes to standard
 //! error with nice colored output for log levels.
