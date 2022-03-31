@@ -1,6 +1,6 @@
 [package]
 name = "pretty_env_logger"
-version = "0.4.1" # don't forget to update html_root_url
+version = "0.4.0" # don't forget to update html_root_url
 description = "a visually pretty env_logger"
 repository = "https://github.com/seanmonstar/pretty-env-logger"
 authors = ["Sean McArthur <sean@seanmonstar>"]
