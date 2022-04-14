@@ -1,0 +1,190 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  rustfmt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install stable toolchain with rustfmt available
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt
+
+      - run: cargo fmt -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy
+          override: true
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - run: cargo clippy -- -D warnings
+
+  install-cross:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 50
+      - uses: XAMPPRocky/get-github-release@v1
+        id: cross
+        with:
+          owner: rust-embedded
+          repo: cross
+          matches: ${{ matrix.platform }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v1
+        with:
+          name: cross-${{ matrix.platform }}
+          path: ${{ steps.cross.outputs.install_path }}
+    strategy:
+      matrix:
+        platform: [linux-musl]
+
+  windows:
+    runs-on: windows-latest
+    # Windows technically doesn't need this, but if we don't block windows on it
+    # some of the windows jobs could fill up the concurrent job queue before
+    # one of the install-cross jobs has started, so this makes sure all
+    # artifacts are downloaded first.
+    needs: install-cross
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 50
+      - run: ci/set_rust_version.bash ${{ matrix.channel }} ${{ matrix.target }}
+        shell: bash
+      - run: ci/build.bash cargo ${{ matrix.target }}
+        shell: bash
+      - run: ci/test.bash cargo ${{ matrix.target }}
+        shell: bash
+
+    strategy:
+      fail-fast: true
+      matrix:
+        channel: [stable, beta, nightly]
+        target:
+          # MSVC
+          - i686-pc-windows-msvc
+          - x86_64-pc-windows-msvc
+          # GNU: You typically only need to test Windows GNU if you're
+          # specifically targetting it, and it can cause issues with some
+          # dependencies if you're not so it's disabled by self.
+          # - i686-pc-windows-gnu
+          # - x86_64-pc-windows-gnu
+
+  macos:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        channel: [stable, beta, nightly]
+        target:
+          - x86_64-apple-darwin
+          ### Disable running tests on M1 target, not currently working
+          ###
+          #- aarch64-apple-darwin
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup | Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          profile: minimal
+          target: ${{ matrix.target }}
+
+      - run: ci/set_rust_version.bash ${{ matrix.channel }} ${{ matrix.target }}
+
+      - name: Test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --target ${{ matrix.target }}
+
+  linux:
+    runs-on: ubuntu-latest
+    needs: install-cross
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 50
+
+      - name: Download Cross
+        uses: actions/download-artifact@v1
+        with:
+          name: cross-linux-musl
+          path: /tmp/
+      - run: chmod +x /tmp/cross
+      - run: ci/set_rust_version.bash ${{ matrix.channel }} ${{ matrix.target }}
+      - run: ci/build.bash /tmp/cross ${{ matrix.target }}
+        # These targets have issues with being tested so they are disabled
+        # by default. You can try disabling to see if they work for
+        # your project.
+      - run: ci/test.bash /tmp/cross ${{ matrix.target }}
+        if: |
+          !contains(matrix.target, 'android') &&
+          !contains(matrix.target, 'bsd') &&
+          !contains(matrix.target, 'solaris') &&
+          matrix.target != 'armv5te-unknown-linux-musleabi' &&
+          matrix.target != 'sparc64-unknown-linux-gnu'
+
+    strategy:
+      fail-fast: true
+      matrix:
+        channel: [stable, beta, nightly]
+        target:
+          # WASM, off by default as most rust projects aren't compatible yet.
+          # - wasm32-unknown-emscripten
+          # Linux
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - arm-unknown-linux-gnueabi
+          - arm-unknown-linux-gnueabihf
+          - armv7-unknown-linux-gnueabihf
+          - i686-unknown-linux-musl
+          - powerpc64le-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          # - i686-unknown-linux-gnu
+          # - mips-unknown-linux-gnu
+          # - mips64-unknown-linux-gnuabi64
+          # - mips64el-unknown-linux-gnuabi64
+          # - mipsel-unknown-linux-gnu
+          # - powerpc-unknown-linux-gnu
+          # - powerpc64-unknown-linux-gnu
+          # - s390x-unknown-linux-gnu
+          # - x86_64-unknown-linux-gnu
+          ## Android
+          # - aarch64-linux-android
+          # - arm-linux-androideabi
+          # - armv7-linux-androideabi
+          # - i686-linux-android
+          # - x86_64-linux-android
+          ## *BSD
+          # The FreeBSD targets can have issues linking so they are disabled
+          # by default.
+          # - i686-unknown-freebsd
+          # - x86_64-unknown-freebsd
+          # - x86_64-unknown-netbsd
+          ## Solaris
+          # - sparcv9-sun-solaris
+          ## Bare Metal
+          # These are no-std embedded targets, so they will only build if your
+          # crate is `no_std` compatible.
+          # - thumbv6m-none-eabi
+          # - thumbv7em-none-eabi
+          # - thumbv7em-none-eabihf
+          # - thumbv7m-none-eabi
