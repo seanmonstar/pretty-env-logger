@@ -1,5 +1,6 @@
 extern crate pretty_env_logger;
-#[macro_use] extern crate log;
+#[macro_use]
+extern crate log;
 
 use std::env;
 
@@ -11,7 +12,6 @@ mod one {
 }
 
 fn main() {
-
     env::set_var("RUST_APP_LOG", "trace");
 
     pretty_env_logger::init_custom_env("RUST_APP_LOG");

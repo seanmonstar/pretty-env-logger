@@ -44,9 +44,11 @@ extern crate log;
 use std::fmt;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use env_logger::{fmt::{Color, Style, StyledValue}, Builder};
+use env_logger::{
+    fmt::{Color, Style, StyledValue},
+    Builder,
+};
 use log::Level;
-
 
 /// Initializes the global logger with a pretty env logger.
 ///
@@ -141,7 +143,9 @@ pub fn try_init_custom_env(environment_variable_name: &str) -> Result<(), log::S
 /// # Errors
 ///
 /// This function fails to set the global logger if one has already been set.
-pub fn try_init_timed_custom_env(environment_variable_name: &str) -> Result<(), log::SetLoggerError> {
+pub fn try_init_timed_custom_env(
+    environment_variable_name: &str,
+) -> Result<(), log::SetLoggerError> {
     let mut builder = formatted_timed_builder();
 
     if let Ok(s) = ::std::env::var(environment_variable_name) {
@@ -174,13 +178,7 @@ pub fn formatted_builder() -> Builder {
             width: max_width,
         });
 
-        writeln!(
-            f,
-            " {} {} > {}",
-            level,
-            target,
-            record.args(),
-        )
+        writeln!(f, " {} {} > {}", level, target, record.args(),)
     });
 
     builder
@@ -210,14 +208,7 @@ pub fn formatted_timed_builder() -> Builder {
 
         let time = f.timestamp_millis();
 
-        writeln!(
-            f,
-            " {} {} {} > {}",
-            time,
-            level,
-            target,
-            record.args(),
-        )
+        writeln!(f, " {} {} {} > {}", time, level, target, record.args(),)
     });
 
     builder
@@ -230,7 +221,7 @@ struct Padded<T> {
 
 impl<T: fmt::Display> fmt::Display for Padded<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{: <width$}", self.value, width=self.width)
+        write!(f, "{: <width$}", self.value, width = self.width)
     }
 }
 
