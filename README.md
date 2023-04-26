@@ -1,3 +1,5 @@
+Changed from the original to use `Builder::from_default_env()` instead of `Builder::new()`.
+
 # pretty-env-logger
 
 [![Crates.io](https://img.shields.io/crates/v/pretty_env_logger.svg)](https://crates.io/crates/pretty_env_logger)
