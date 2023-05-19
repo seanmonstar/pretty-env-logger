@@ -237,7 +237,8 @@ fn max_target_width(target: &str) -> usize {
     }
 }
 
-fn colored_level<'a>(style: &'a mut Style, level: Level) -> StyledValue<'a, &'static str> {
+/// Returns a styled value of a colored string with level name
+pub fn colored_level<'a>(style: &'a mut Style, level: Level) -> StyledValue<'a, &'static str> {
     match level {
         Level::Trace => style.set_color(Color::Magenta).value("TRACE"),
         Level::Debug => style.set_color(Color::Blue).value("DEBUG"),
