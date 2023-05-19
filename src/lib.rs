@@ -63,6 +63,19 @@ pub fn init() {
     try_init().unwrap();
 }
 
+/// Initializes the global logger with a line numbered pretty env logger.
+///
+/// This should be called early in the execution of a Rust program, and the
+/// global logger may only be initialized once. Future initialization attempts
+/// will return an error.
+///
+/// # Panics
+///
+/// This function fails to set the global logger if one has already been set.
+pub fn init_numbered() {
+    try_init_numbered().unwrap();
+}
+
 /// Initializes the global logger with a timed pretty env logger.
 ///
 /// This should be called early in the execution of a Rust program, and the
@@ -87,6 +100,19 @@ pub fn init_timed() {
 /// This function fails to set the global logger if one has already been set.
 pub fn try_init() -> Result<(), log::SetLoggerError> {
     try_init_custom_env("RUST_LOG")
+}
+
+/// Initializes the global logger with a line numbered pretty env logger.
+///
+/// This should be called early in the execution of a Rust program, and the
+/// global logger may only be initialized once. Future initialization attempts
+/// will return an error.
+///
+/// # Errors
+///
+/// This function fails to set the global logger if one has already been set.
+pub fn try_init_numbered() -> Result<(), log::SetLoggerError> {
+    try_init_numbered_custom_env("RUST_LOG")
 }
 
 /// Initializes the global logger with a timed pretty env logger.
@@ -126,6 +152,25 @@ pub fn init_custom_env(environment_variable_name: &str) {
 /// This function fails to set the global logger if one has already been set.
 pub fn try_init_custom_env(environment_variable_name: &str) -> Result<(), log::SetLoggerError> {
     let mut builder = formatted_builder();
+
+    if let Ok(s) = ::std::env::var(environment_variable_name) {
+        builder.parse_filters(&s);
+    }
+
+    builder.try_init()
+}
+
+/// Initialized the global logger with aline numbered pretty env logger, with a custom variable name.
+///
+/// This should be called early in the execution of a Rust program, and the
+/// global logger may only be initialized once. Future initialization attempts
+/// will return an error.
+///
+/// # Errors
+///
+/// This function fails to set the global logger if one has already been set.
+pub fn try_init_numbered_custom_env(environment_variable_name: &str) -> Result<(), log::SetLoggerError> {
+    let mut builder = formatted_numbered_builder();
 
     if let Ok(s) = ::std::env::var(environment_variable_name) {
         builder.parse_filters(&s);
@@ -179,6 +224,36 @@ pub fn formatted_builder() -> Builder {
         });
 
         writeln!(f, " {} {} > {}", level, target, record.args(),)
+    });
+
+    builder
+}
+
+/// Returns a `env_logger::Builder` for further customization.
+///
+/// This method will return a colored and formatted `env_logger::Builder`
+/// for further customization. Refer to env_logger::Build crate documentation
+/// for further details and usage.
+pub fn formatted_numbered_builder() -> Builder {
+    let mut builder = Builder::new();
+
+    builder.format(|f, record| {
+        use std::io::Write;
+
+        let target = record.target();
+        let line_number = record.line().unwrap_or(0);
+        let max_width = max_target_width(target);
+
+        let mut style = f.style();
+        let level = colored_level(&mut style, record.level());
+
+        let mut style = f.style();
+        let target = style.set_bold(true).value(Padded {
+            value: target,
+            width: max_width,
+        });
+
+        writeln!(f, " {} {}:{} > {}", level, target, line_number, record.args(),)
     });
 
     builder
