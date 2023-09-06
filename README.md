@@ -3,7 +3,6 @@
 [![Crates.io](https://img.shields.io/crates/v/pretty_env_logger.svg)](https://crates.io/crates/pretty_env_logger)
 [![Docs](https://docs.rs/pretty_env_logger/badge.svg)](https://docs.rs/pretty_env_logger)
 [![MIT/APACHE-2.0](https://img.shields.io/crates/l/pretty_env_logger.svg)](https://crates.io/crates/pretty_env_logger)
-[![Travis CI](https://travis-ci.org/seanmonstar/pretty-env-logger.svg?branch=master)](https://travis-ci.org/seanmonstar/pretty-env-logger)
 
 A simple logger built on top of [env_logger](https://docs.rs/env_logger).
 It is configured via an environment variable and writes to standard
@@ -18,14 +17,14 @@ Add the dependency to your `Cargo.toml`:
 ```toml
 [dependencies]
 log = "0.4"
-pretty_env_logger = "0.4"
+pretty_env_logger = "0.5"
 ```
 
 Add some usage to your application:
 
 ```rust
-extern crate pretty_env_logger;
-#[macro_use] extern crate log;
+use pretty_env_logger;
+use log;
 
 fn main() {
     pretty_env_logger::init();
