@@ -45,10 +45,12 @@ use std::fmt;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use env_logger::{
-    fmt::{Color, Style, StyledValue},
+    fmt::style::{AnsiColor, Color, Style},
     Builder,
 };
 use log::Level;
+
+const BSTYLE: Style = Style::new().bold();
 
 /// Initializes the global logger with a pretty env logger.
 ///
@@ -169,16 +171,24 @@ pub fn formatted_builder() -> Builder {
         let target = record.target();
         let max_width = max_target_width(target);
 
-        let mut style = f.style();
-        let level = colored_level(&mut style, record.level());
+        let (lstyle, level) = colored_level(record.level());
 
-        let mut style = f.style();
-        let target = style.set_bold(true).value(Padded {
+        let target = Padded {
             value: target,
             width: max_width,
-        });
+        };
 
-        writeln!(f, " {} {} > {}", level, target, record.args(),)
+        writeln!(
+            f,
+            " {}{}{:#} {}{}{:#} > {}",
+            lstyle,
+            level,
+            lstyle,
+            BSTYLE,
+            target,
+            BSTYLE,
+            record.args(),
+        )
     });
 
     builder
@@ -197,18 +207,27 @@ pub fn formatted_timed_builder() -> Builder {
         let target = record.target();
         let max_width = max_target_width(target);
 
-        let mut style = f.style();
-        let level = colored_level(&mut style, record.level());
+        let (lstyle, level) = colored_level(record.level());
 
-        let mut style = f.style();
-        let target = style.set_bold(true).value(Padded {
+        let target = Padded {
             value: target,
             width: max_width,
-        });
+        };
 
         let time = f.timestamp_millis();
 
-        writeln!(f, " {} {} {} > {}", time, level, target, record.args(),)
+        writeln!(
+            f,
+            " {}{}{:#} {} {}{}{:#} > {}",
+            lstyle,
+            time,
+            lstyle,
+            level,
+            BSTYLE,
+            target,
+            BSTYLE,
+            record.args(),
+        )
     });
 
     builder
@@ -237,12 +256,20 @@ fn max_target_width(target: &str) -> usize {
     }
 }
 
-fn colored_level<'a>(style: &'a mut Style, level: Level) -> StyledValue<'a, &'static str> {
-    match level {
-        Level::Trace => style.set_color(Color::Magenta).value("TRACE"),
-        Level::Debug => style.set_color(Color::Blue).value("DEBUG"),
-        Level::Info => style.set_color(Color::Green).value("INFO "),
-        Level::Warn => style.set_color(Color::Yellow).value("WARN "),
-        Level::Error => style.set_color(Color::Red).value("ERROR"),
-    }
+const fn colored_level(level: Level) -> (Style, &'static str) {
+    let style = Style::new();
+    let (style, level) = match level {
+        Level::Trace => (
+            style.fg_color(Some(Color::Ansi(AnsiColor::Magenta))),
+            "TRACE",
+        ),
+        Level::Debug => (style.fg_color(Some(Color::Ansi(AnsiColor::Blue))), "DEBUG"),
+        Level::Info => (style.fg_color(Some(Color::Ansi(AnsiColor::Green))), "INFO "),
+        Level::Warn => (
+            style.fg_color(Some(Color::Ansi(AnsiColor::Yellow))),
+            "WARN ",
+        ),
+        Level::Error => (style.fg_color(Some(Color::Ansi(AnsiColor::Red))), "ERROR"),
+    };
+    (style, level)
 }
