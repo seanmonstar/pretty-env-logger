@@ -41,11 +41,10 @@ pub extern crate env_logger;
 
 extern crate log;
 
-use std::fmt;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use env_logger::{
-    fmt::{Color, Style, StyledValue},
+    fmt::style::{AnsiColor, Style},
     Builder,
 };
 use log::Level;
@@ -169,16 +168,15 @@ pub fn formatted_builder() -> Builder {
         let target = record.target();
         let max_width = max_target_width(target);
 
-        let mut style = f.style();
-        let level = colored_level(&mut style, record.level());
+        let (level_style, level) = colored_level(record.level());
+        let target_style = Style::new().bold();
 
-        let mut style = f.style();
-        let target = style.set_bold(true).value(Padded {
-            value: target,
-            width: max_width,
-        });
-
-        writeln!(f, " {} {} > {}", level, target, record.args(),)
+        writeln!(
+            f,
+            " {level_style}{level}{level_style:#} \
+             {target_style}{target:<max_width$}{target_style:#} > {}",
+            record.args(),
+        )
     });
 
     builder
@@ -197,32 +195,19 @@ pub fn formatted_timed_builder() -> Builder {
         let target = record.target();
         let max_width = max_target_width(target);
 
-        let mut style = f.style();
-        let level = colored_level(&mut style, record.level());
-
-        let mut style = f.style();
-        let target = style.set_bold(true).value(Padded {
-            value: target,
-            width: max_width,
-        });
-
+        let (level_style, level) = colored_level(record.level());
+        let target_style = Style::new().bold();
         let time = f.timestamp_millis();
 
-        writeln!(f, " {} {} {} > {}", time, level, target, record.args(),)
+        writeln!(
+            f,
+            " {time} {level_style}{level}{level_style:#} \
+             {target_style}{target:<max_width$}{target_style:#} > {}",
+            record.args(),
+        )
     });
 
     builder
-}
-
-struct Padded<T> {
-    value: T,
-    width: usize,
-}
-
-impl<T: fmt::Display> fmt::Display for Padded<T> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{: <width$}", self.value, width = self.width)
-    }
 }
 
 static MAX_MODULE_WIDTH: AtomicUsize = AtomicUsize::new(0);
@@ -237,12 +222,12 @@ fn max_target_width(target: &str) -> usize {
     }
 }
 
-fn colored_level<'a>(style: &'a mut Style, level: Level) -> StyledValue<'a, &'static str> {
+fn colored_level(level: Level) -> (Style, &'static str) {
     match level {
-        Level::Trace => style.set_color(Color::Magenta).value("TRACE"),
-        Level::Debug => style.set_color(Color::Blue).value("DEBUG"),
-        Level::Info => style.set_color(Color::Green).value("INFO "),
-        Level::Warn => style.set_color(Color::Yellow).value("WARN "),
-        Level::Error => style.set_color(Color::Red).value("ERROR"),
+        Level::Trace => (AnsiColor::Magenta.on_default(), "TRACE"),
+        Level::Debug => (AnsiColor::Blue.on_default(), "DEBUG"),
+        Level::Info => (AnsiColor::Green.on_default(), "INFO "),
+        Level::Warn => (AnsiColor::Yellow.on_default(), "WARN "),
+        Level::Error => (AnsiColor::Red.on_default(), "ERROR"),
     }
 }
