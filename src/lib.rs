@@ -160,7 +160,7 @@ pub fn try_init_timed_custom_env(
 /// for further customization. Refer to env_logger::Build crate documentation
 /// for further details and usage.
 pub fn formatted_builder() -> Builder {
-    let mut builder = Builder::new();
+    let mut builder = Builder::from_default_env();
 
     builder.format(|f, record| {
         use std::io::Write;
@@ -188,7 +188,7 @@ pub fn formatted_builder() -> Builder {
 /// for further customization. Refer to env_logger::Build crate documentation
 /// for further details and usage.
 pub fn formatted_timed_builder() -> Builder {
-    let mut builder = Builder::new();
+    let mut builder = Builder::from_default_env();
 
     builder.format(|f, record| {
         use std::io::Write;
